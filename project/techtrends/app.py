@@ -1,7 +1,10 @@
 import sqlite3
+import logging
 
 from flask import Flask, jsonify, json, render_template, request, url_for, redirect, flash
 from werkzeug.exceptions import abort
+
+logging.getLogger().setLevel(logging.DEBUG)
 
 # Function to get a database connection.
 # This function connects to database with the name `database.db`
@@ -36,13 +39,16 @@ def index():
 def post(post_id):
     post = get_post(post_id)
     if post is None:
+      app.logger.info(f'page with {post_id} not found')
       return render_template('404.html'), 404
     else:
+      app.logger.info(f'Post with title {post["title"]} was accessed')
       return render_template('post.html', post=post)
 
 # Define the About Us page
 @app.route('/about')
 def about():
+    app.logger.info('About Us page is retreived')
     return render_template('about.html')
 
 # Define the post creation functionality 
@@ -60,10 +66,25 @@ def create():
                          (title, content))
             connection.commit()
             connection.close()
-
+            
+            app.logger.info(f'Post with title {title} was created')
             return redirect(url_for('index'))
 
     return render_template('create.html')
+
+
+@app.route('/healthz')
+def health():
+    return jsonify({'result': 'OK - healthy'})
+
+##TODO find the active connection counts
+
+@app.route('/metrics')
+def metrics():
+    connection = get_db_connection()
+    count = connection.execute('select count(*) from posts').fetchone()
+    connection.close()
+    return jsonify({"db_connection_count": 1, "post_count": count[0]})
 
 # start the application on port 3111
 if __name__ == "__main__":
