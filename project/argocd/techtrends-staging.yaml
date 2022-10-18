@@ -13,5 +13,5 @@ spec:
       valueFiles:
         - values-staging.yaml
     path: project/helm
-    repoUrl: https://github.com/rbhadauria/shell-nd-techtrends
+    repoURL: https://github.com/rbhadauria/shell-nd-techtrends
     targetRevision: HEAD
